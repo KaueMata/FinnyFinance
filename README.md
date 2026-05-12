@@ -1,26 +1,30 @@
-Finny Finance 
-O Finny Finance é um administrador de finanças pessoais leve e intuitivo, desenvolvido para rodar localmente no computador. O projeto utiliza Node.js no backend para manipular dados em arquivos JSON e uma interface moderna em HTML/CSS no frontend.
+# Finny Finance 💰
 
-🚀 Funcionalidades
-Registro de Transações: Adicione receitas e despesas com descrição, valor e categoria.
+O **Finny Finance** é um administrador de finanças pessoais leve e intuitivo, desenvolvido para rodar localmente no computador. O projeto utiliza **Node.js** no backend para manipular dados em arquivos JSON e uma interface moderna em **HTML/CSS** no frontend.
 
-Dashboard Inteligente: Visualização em tempo real do Saldo Total, Entradas e Saídas.
+---
 
-Persistência Local: Seus dados são salvos em um arquivo financas.json no seu próprio disco rígido.
+## 🚀 Funcionalidades
 
-Interface Dark Mode: Design focado em usabilidade e conforto visual.
+* **Registro de Transações**: Adicione receitas e despesas com descrição, valor e categoria.
+* **Dashboard Inteligente**: Visualização em tempo real do Saldo Total, Entradas e Saídas.
+* **Persistência Local**: Seus dados são salvos em um arquivo `financas.json` no seu próprio disco rígido.
+* **Interface Dark Mode**: Design focado em usabilidade e conforto visual.
 
-🛠️ Tecnologias Utilizadas
-Frontend: HTML5, CSS3 e JavaScript Vanilla.
+---
 
-Backend: Node.js com o framework Express.
+## 🛠️ Tecnologias Utilizadas[cite: 1]
 
-Banco de Dados: Arquivo JSON local processado pelo módulo fs (File System).
+* **Frontend**: HTML5, CSS3 e JavaScript Vanilla.
+* **Backend**: [Node.js](https://nodejs.org/) com o framework **Express**.
+* **Banco de Dados**: Arquivo JSON local processado pelo módulo `fs` (File System).
+* **Segurança de IDs**: Biblioteca `uuid` para garantir que cada transação seja única.
 
-Segurança de IDs: Biblioteca uuid para garantir que cada transação seja única.
+---
 
-📂 Estrutura de Pastas
-Plaintext
+## 📂 Estrutura de Pastas
+
+```text
 Finny Finance/
 ├── data/
 │   └── financas.json      # Onde os dados são armazenados
@@ -31,29 +35,45 @@ Finny Finance/
 ├── style.css              # Estilização (Dark Mode)
 ├── .gitignore             # Arquivo para não subir lixo para o Git
 └── package.json           # Dependências e scripts do projeto
-⚙️ Como Rodar o Projeto
-Clone o repositório:
+```[cite: 1]
 
-Bash
-git clone https://github.com/KaueMata/FinnyFinance.git
-Instale as dependências:
+---
 
-Bash
-npm install
-Inicie o servidor:
+## ⚙️ Como Rodar o Projeto
 
-Bash
-node src/index.js
-Acesse no navegador:
-Abra http://localhost:3000
+1.  **Clone o repositório**:
+    ```bash
+    git clone [https://github.com/KaueMata/FinnyFinance.git](https://github.com/KaueMata/FinnyFinance.git)
+    
+```
+2.  **Instale as dependências**:
+    ```bash
+    npm install
+    
 
-Aprendizados (O que eu estudei aqui)
+3.  **Inicie o servidor**:
+    ```bash
+    node src/index.js
+    
+
+4.  **Acesse no navegador**:
+    Abra `http://localhost:3000`
+
+---
+
+## 🧠 Aprendizados (O que eu estudei aqui)
+
 Neste projeto, apliquei conceitos fundamentais de desenvolvimento Full Stack:
+1.  **Comunicação Cliente-Servidor**: Como o navegador envia dados para o servidor via métodos HTTP (POST, GET, DELETE).
+2.  **Manipulação de JSON**: Como ler e escrever arquivos de texto para simular um banco de dados.
+3.  **Gestão de Dependências**: Uso do NPM para gerenciar bibliotecas externas.
+4.  **Versionamento**: Uso do Git para controle de histórico e backup no GitHub.
 
-Comunicação Cliente-Servidor: Como o navegador envia dados para o servidor via métodos HTTP (POST, GET, DELETE).
+---
 
-Manipulação de JSON: Como ler e escrever arquivos de texto para simular um banco de dados.
+## 📈 Próximos Passos (Backlog)
 
-Gestão de Dependências: Uso do NPM para gerenciar bibliotecas externas.
-
-Versionamento: Uso do Git para controle de histórico e backup no GitHub.
+* [ ] Implementar gráficos com **Chart.js**.
+* [ ] Migrar o armazenamento de `fs` para `localStorage` (versão Mobile/PWA).
+* [ ] Adicionar filtros por data (mês/ano).
+* [ ] Criar sistema de metas de economia.
