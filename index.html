@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planejador Sábio Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Planejador Sábio 🦉</h1>
+            <div class="header-actions">
+                <input type="number" id="limit-input" placeholder="Meta de Gasto Mensal">
+                <button onclick="updateLimit()" class="btn-small">Definir Meta</button>
+                <button onclick="exportCSV()" class="btn-export">📥 Exportar CSV</button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section class="dashboard">
+            <div class="card" id="card-balance">
+                <h3>Saldo Atual</h3>
+                <p id="total-balance">R$ 0,00</p>
+                <small id="limit-status"></small>
+            </div>
+            <div class="card income">
+                <h3>Entradas</h3>
+                <p id="total-income">R$ 0,00</p>
+            </div>
+            <div class="card expense">
+                <h3>Saídas</h3>
+                <p id="total-expense">R$ 0,00</p>
+            </div>
+            <div class="card chart-card">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </section>
+
+        <!-- FILTROS -->
+        <section class="filters">
+            <select id="filter-month" onchange="renderAll()">
+                <option value="all">Todos os Meses</option>
+                <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+                <option value="2">Março</option><option value="3">Abril</option>
+                <option value="4">Maio</option><option value="5">Junho</option>
+                <option value="6">Julho</option><option value="7">Agosto</option>
+                <option value="8">Setembro</option><option value="9">Outubro</option>
+                <option value="10">Novembro</option><option value="11">Dezembro</option>
+            </select>
+            <select id="filter-category" onchange="renderAll()">
+                <option value="all">Todas Categorias</option>
+                <option value="Essencial">Essencial</option>
+                <option value="Lazer">Lazer</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Reserva">Reserva</option>
+            </select>
+        </section>
+
+        <!-- FORMULÁRIO -->
+        <section class="form-container">
+            <form id="finance-form">
+                <input type="text" id="desc" placeholder="Descrição" required>
+                <input type="number" id="amount" placeholder="Valor" step="0.01" required>
+                <select id="type">
+                    <option value="entrada">Receita (+)</option>
+                    <option value="saida">Despesa (-)</option>
+                </select>
+                <select id="category">
+                    <option value="Essencial">Essencial</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Reserva">Reserva</option>
+                </select>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="is-fixed"> 
+                    <label for="is-fixed">Gasto Fixo? 📌</label>
+                </div>
+                <button type="submit">Adicionar</button>
+            </form>
+        </section>
+
+        <!-- TABELA -->
+        <section class="history">
+            <table id="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Descrição</th>
+                        <th>Cat.</th>
+                        <th>Valor</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-list"></tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+        let db = { transacoes: [], limiteMensal: 0 };
+        let myChart = null;
+
+        async function fetchData() {
+            const res = await fetch('/api/dados');
+            db = await res.json();
+            document.getElementById('limit-input').value = db.limiteMensal;
+            renderAll();
+        }
+
+        async function updateLimit() {
+            const limiteMensal = document.getElementById('limit-input').value;
+            await fetch('/api/config', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ limiteMensal })
+            });
+            fetchData();
+        }
+
+        function renderAll() {
+            const monthFilter = document.getElementById('filter-month').value;
+            const catFilter = document.getElementById('filter-category').value;
+
+            // Filtragem
+            let filtered = db.transacoes.filter(t => {
+                const date = new Date(t.data);
+                const matchMonth = monthFilter === 'all' || date.getMonth() == monthFilter;
+                const matchCat = catFilter === 'all' || t.cat === catFilter;
+                return matchMonth && matchCat;
+            });
+
+            updateDashboard(filtered);
+            updateTable(filtered);
+            updateChart(filtered);
+        }
+
+        function updateDashboard(items) {
+            const entradas = items.filter(t => t.valor > 0).reduce((acc, t) => acc + t.valor, 0);
+            const saidas = items.filter(t => t.valor < 0).reduce((acc, t) => acc + Math.abs(t.valor), 0);
+            const saldo = entradas - saidas;
+
+            document.getElementById('total-balance').innerText = `R$ ${saldo.toFixed(2)}`;
+            document.getElementById('total-income').innerText = `R$ ${entradas.toFixed(2)}`;
+            document.getElementById('total-expense').innerText = `R$ ${saidas.toFixed(2)}`;
+
+            // Alerta de Metas
+            const cardBalance = document.getElementById('card-balance');
+            const statusText = document.getElementById('limit-status');
+            const percentUsed = (saidas / db.limiteMensal) * 100;
+
+            if (percentUsed >= 100) {
+                cardBalance.className = "card alert-danger";
+                statusText.innerText = "🚨 Limite ultrapassado!";
+            } else if (percentUsed >= 80) {
+                cardBalance.className = "card alert-warning";
+                statusText.innerText = "⚠️ 80% do limite atingido";
+            } else {
+                cardBalance.className = "card";
+                statusText.innerText = `Meta: R$ ${db.limiteMensal}`;
+            }
+        }
+
+        function updateTable(items) {
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = items.map(t => `
+                <tr>
+                    <td>${new Date(t.data).toLocaleDateString('pt-BR')}</td>
+                    <td>${t.desc} ${t.fixo ? '📌' : ''}</td>
+                    <td><span class="tag">${t.cat}</span></td>
+                    <td class="${t.valor > 0 ? 'text-success' : 'text-danger'}">R$ ${t.valor.toFixed(2)}</td>
+                    <td><button onclick="deleteTx('${t.id}')" class="btn-del">✕</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateChart(items) {
+            const expensesByCat = {};
+            items.filter(t => t.valor < 0).forEach(t => {
+                expensesByCat[t.cat] = (expensesByCat[t.cat] || 0) + Math.abs(t.valor);
+            });
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            if(myChart) myChart.destroy();
+            
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(expensesByCat),
+                    datasets: [{
+                        data: Object.values(expensesByCat),
+                        backgroundColor: ['#38bdf8', '#4ade80', '#f87171', '#fbbf24', '#a78bfa']
+                    }]
+                },
+                options: { plugins: { legend: { labels: { color: '#94a3b8' } } } }
+            });
+        }
+
+        document.getElementById('finance-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                desc: document.getElementById('desc').value,
+                valor: parseFloat(document.getElementById('amount').value),
+                tipo: document.getElementById('type').value,
+                cat: document.getElementById('category').value,
+                fixo: document.getElementById('is-fixed').checked
+            };
+            await fetch('/api/transacoes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            e.target.reset();
+            fetchData();
+        };
+
+        async function deleteTx(id) {
+            if(confirm('Excluir?')) {
+                await fetch(`/api/transacoes/${id}`, { method: 'DELETE' });
+                fetchData();
+            }
+        }
+
+        function exportCSV() {
+            let csv = "Data,Descricao,Categoria,Valor,Fixo\n";
+            db.transacoes.forEach(t => {
+                csv += `${t.data},"${t.desc}",${t.cat},${t.valor},${t.fixo}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'financas_planejador_sabio.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>

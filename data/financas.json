@@ -1,0 +1,38 @@
+{
+  "usuario": "Usuário",
+  "transacoes": [
+    {
+      "id": "56bb7189-a422-46f4-be14-980a2a1b3850",
+      "data": "2026-05-12T17:49:31.795Z",
+      "desc": "neflix",
+      "valor": -25,
+      "cat": "Lazer",
+      "fixo": true
+    },
+    {
+      "id": "35059cb8-faf9-4de7-9dab-ca12d6bf4e3f",
+      "data": "2026-05-12T17:49:08.893Z",
+      "desc": "faculdade",
+      "valor": -300,
+      "cat": "Essencial",
+      "fixo": true
+    },
+    {
+      "id": "376e932a-08f5-4993-96eb-afcb38df167f",
+      "data": "2026-05-12T17:48:53.467Z",
+      "desc": "Bonus",
+      "valor": 700,
+      "cat": "Essencial",
+      "fixo": false
+    },
+    {
+      "id": "7544518d-8f9e-42c1-a02e-b4b309bf4c86",
+      "data": "2026-05-12T17:48:12.375Z",
+      "desc": "Salario",
+      "valor": 1000,
+      "cat": "Essencial",
+      "fixo": false
+    }
+  ],
+  "limiteMensal": 1300
+}
